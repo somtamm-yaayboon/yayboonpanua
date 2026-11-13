@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>จัดการเมนูอาหาร</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.42.0/dist/umd/supabase.js"></script>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 24px 12px;
+      background: #f7f8fa;
+      color: #333;
+      font-family: Tahoma, Arial, sans-serif;
+      font-size: 14px;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: auto;
+      padding: 20px;
+      background: white;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(0,0,0,.06);
+    }
+
+    h1 { margin: 0 0 20px; font-size: 22px; }
+
+    label, .field-label {
+      display: block;
+      margin: 0 0 6px;
+      font-size: 15px;
+    }
+
+    .field { margin-bottom: 16px; }
+
+    input, select, button { font: inherit; }
+
+    input[type="text"],
+    input[type="number"],
+    select {
+      width: 100%;
+      height: 38px;
+      padding: 8px 10px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      background: white;
+    }
+
+    #menuPrice {
+      width: 177px;
+      height: 24px;
+      padding: 2px 5px;
+      border-radius: 0;
+    }
+
+    input[type="file"] { max-width: 100%; }
+
+    .option-row {
+      display: grid;
+      grid-template-columns: 1.9fr 1fr;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .exclude-input { margin-bottom: 8px; }
+
+    button {
+      border: 0;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:disabled {
+      opacity: .55;
+      cursor: not-allowed;
+    }
+
+    .save-button {
+      width: 100%;
+      min-height: 44px;
+      margin-top: 8px;
+      color: white;
+      background: #e73333;
+      font-weight: bold;
+      font-size: 16px;
+    }
+
+    #cancelEdit {
+      display: none;
+      width: 100%;
+      margin-top: 8px;
+      padding: 10px;
+      background: #eee;
+    }
+
+    .list-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 22px;
+      padding-bottom: 9px;
+      border-bottom: 1px solid #e5e5e5;
+    }
+
+    .list-heading h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    #reloadButton {
+      padding: 6px 9px;
+      color: #555;
+      background: #eee;
+      font-size: 12px;
+    }
+
+    .menu-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 15px;
+      padding: 11px 10px;
+      border: 1px solid #eee;
+      border-radius: 9px;
+    }
+
+    .menu-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .menu-image {
+      width: 50px;
+      height: 50px;
+      flex-shrink: 0;
+      object-fit: cover;
+      border-radius: 5px;
+      background: #f1f1f1;
+    }
+
+    .menu-name { font-weight: bold; overflow-wrap: anywhere; }
+
+    .badge {
+      display: inline-block;
+      margin-left: 5px;
+      padding: 2px 6px;
+      background: #e7e7e7;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: normal;
+    }
+
+    .price {
+      margin-top: 3px;
+      color: #e73333;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    .option-summary {
+      margin-top: 4px;
+      color: #777;
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .actions {
+      display: flex;
+      flex-shrink: 0;
+      gap: 8px;
+    }
+
+    .actions button { padding: 6px 9px; font-size: 12px; }
+    .sale-button { color: #47764c; background: #cce7ce; }
+    .closed-button { color: #666; background: #e3e3e3; }
+    .edit-button { color: #a47921; background: #ffe28d; }
+    .delete-button { color: #b45764; background: #facdd4; }
+
+    #message {
+      display: none;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      line-height: 1.6;
+    }
+
+    #message.info { display: block; background: #eaf2ff; color: #24517e; }
+    #message.success { display: block; background: #e8f6ec; color: #246537; }
+    #message.error { display: block; background: #fdeaea; color: #a52b2b; }
+
+    .empty { padding: 18px 0; color: #777; }
+
+    #imagePreview {
+      display: none;
+      width: 90px;
+      height: 75px;
+      margin-top: 8px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .hint {
+      display: block;
+      margin-top: 5px;
+      color: #888;
+      font-size: 11px;
+    }
+
+    @media (max-width: 520px) {
+      .container { padding: 15px; }
+      .menu-card { flex-wrap: wrap; }
+      .actions { margin-left: auto; }
+      .option-row { grid-template-columns: 1.7fr 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <h1 id="formTitle">จัดการเมนูอาหาร</h1>
+    <div id="message" role="status" aria-live="polite"></div>
+
+    <form id="menuForm">
+      <div class="field">
+        <label for="menuName">ชื่อเมนู</label>
+        <input id="menuName" type="text" required maxlength="150"
+               placeholder="เช่น ส้มตำไทย">
+      </div>
+
+      <div class="field">
+        <label for="menuCategory">หมวดหมู่</label>
+        <select id="menuCategory">
+          <option>เมนูส้มตำ</option>
+          <option>เมนูยำ</option>
+          <option>เมนูทอด</option>
+          <option>เมนูต้ม</option>
+          <option>เมนูข้าว</option>
+          <option>เครื่องดื่ม</option>
+          <option>อื่น ๆ</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="menuImage">รูปภาพเมนู</label>
+        <input id="menuImage" type="file"
+               accept="image/jpeg,image/png,image/webp,image/gif">
+        <img id="imagePreview" alt="ตัวอย่างรูปเมนู">
+        <small class="hint">
+          รูปไม่เกิน 500 KB — ตอนแก้ไขไม่เลือกรูปใหม่จะใช้รูปเดิม
+        </small>
+      </div>
+
+      <div class="field">
+        <label for="menuPrice">ราคา (บาท)</label>
+        <input id="menuPrice" type="number" min="0" step="0.01"
+               required placeholder="เช่น 60">
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          ตัวเลือก "เพิ่ม" (เช่น เพิ่มไข่เค็ม, เพิ่มหมูยอ)
+        </div>
+
+        <div class="option-row">
+          <input class="extra-name" type="text"
+                 aria-label="ชื่อรายการเพิ่ม 1"
+                 placeholder="ชื่อตัวเลือกที่ 1 (เช่น ไข่เค็ม)">
+          <input class="extra-price" type="number" min="0" step="0.01"
+                 aria-label="ราคารายการเพิ่ม 1" placeholder="ราคา (+ บาท)">
+        </div>
+        <div class="option-row">
+          <input class="extra-name" type="text"
+                 aria-label="ชื่อรายการเพิ่ม 2"
+                 placeholder="ชื่อตัวเลือกที่ 2 (เช่น แคบหมู)">
+          <input class="extra-price" type="number" min="0" step="0.01"
+                 aria-label="ราคารายการเพิ่ม 2" placeholder="ราคา (+ บาท)">
+        </div>
+        <div class="option-row">
+          <input class="extra-name" type="text"
+                 aria-label="ชื่อรายการเพิ่ม 3"
+                 placeholder="ชื่อตัวเลือกที่ 3 (เช่น ขนมจีน)">
+          <input class="extra-price" type="number" min="0" step="0.01"
+                 aria-label="ราคารายการเพิ่ม 3" placeholder="ราคา (+ บาท)">
+        </div>
+        <div class="option-row">
+          <input class="extra-name" type="text"
+                 aria-label="ชื่อรายการเพิ่ม 4"
+                 placeholder="ชื่อตัวเลือกที่ 4 (เช่น หมูยอ)">
+          <input class="extra-price" type="number" min="0" step="0.01"
+                 aria-label="ราคารายการเพิ่ม 4" placeholder="ราคา (+ บาท)">
+        </div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">
+          ตัวเลือก "ไม่เอา" (เช่น ไม่ใส่พริก, ไม่ใส่ถั่วฝักยาว)
+        </div>
+        <input class="exclude-input" type="text"
+               aria-label="ไม่เอา 1" placeholder="ช่องที่ 1 (เช่น ไม่ใส่พริก)">
+        <input class="exclude-input" type="text"
+               aria-label="ไม่เอา 2" placeholder="ช่องที่ 2 (เช่น ไม่ใส่ถั่วฝักยาว)">
+        <input class="exclude-input" type="text"
+               aria-label="ไม่เอา 3" placeholder="ช่องที่ 3 (เช่น ไม่ใส่กุ้งแห้ง)">
+        <input class="exclude-input" type="text"
+               aria-label="ไม่เอา 4" placeholder="ช่องที่ 4 (เช่น ไม่ใส่ผงชูรส)">
+      </div>
+
+      <button id="saveButton" class="save-button" type="submit">
+        บันทึกเมนู
+      </button>
+      <button id="cancelEdit" type="button">ยกเลิกการแก้ไข</button>
+    </form>
+
+    <section>
+      <div class="list-heading">
+        <h2>📋 รายการเมนูทั้งหมด</h2>
+        <button id="reloadButton" type="button">โหลดใหม่</button>
+      </div>
+      <div id="menuList" class="empty">กำลังเตรียมเชื่อมต่อ...</div>
+    </section>
+  </main>
+
+  <script>
+    // ===== ใช้ Publishable Key จากหน้า Dashboard ของคุณ =====
+    const SUPABASE_URL = "https://zlhgzcvzwvkyaklajkmi.supabase.co";
+const SUPABASE_KEY = "sb_publishable_2PpazCOtie3x28WsnUfu8g_w3hOqSEk";
+
+    const $ = id => document.getElementById(id);
+    const form = $("menuForm");
+    const list = $("menuList");
+    const message = $("message");
+    const saveButton = $("saveButton");
+    const reloadButton = $("reloadButton");
+    const imageInput = $("menuImage");
+    const preview = $("imagePreview");
+
+    const extraNames = [...document.querySelectorAll(".extra-name")];
+    const extraPrices = [...document.querySelectorAll(".extra-price")];
+    const excludeInputs = [...document.querySelectorAll(".exclude-input")];
+
+    let db = null;
+    let menus = [];
+    let editingId = null;
+    let existingImage = null;
+    let previewURL = null;
+    let busy = false;
+    let loadVersion = 0;
+
+    const MAX_IMAGE_SIZE = 500 * 1024;
+    const IMAGE_TYPES = [
+      "image/jpeg", "image/png", "image/webp", "image/gif"
+    ];
+
+    function notify(text, type = "info") {
+      message.textContent = text;
+      message.className = type;
+    }
+
+    function errorText(error) {
+      return error && error.message ? error.message : String(error);
+    }
+
+    function setBusy(value) {
+      busy = value;
+      saveButton.disabled = value || !db;
+      reloadButton.disabled = value || !db;
+      $("cancelEdit").disabled = value;
+
+      list.querySelectorAll("button").forEach(button => {
+        button.disabled = value;
+      });
+    }
+
+    function resetPreview() {
+      if (previewURL) URL.revokeObjectURL(previewURL);
+      previewURL = null;
+      preview.removeAttribute("src");
+      preview.style.display = "none";
+    }
+
+    function resetForm() {
+      form.reset();
+      editingId = null;
+      existingImage = null;
+      resetPreview();
+      $("formTitle").textContent = "จัดการเมนูอาหาร";
+      saveButton.textContent = "บันทึกเมนู";
+      $("cancelEdit").style.display = "none";
+    }
+
+    function validateImage(file) {
+      if (!IMAGE_TYPES.includes(file.type)) {
+        throw new Error("กรุณาเลือกรูป JPG, PNG, WebP หรือ GIF");
+      }
+      if (file.size > MAX_IMAGE_SIZE) {
+        throw new Error("รูปเกิน 500 KB กรุณาลดขนาดรูปก่อน");
+      }
+    }
+
+    function readImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject(new Error("อ่านรูปภาพไม่สำเร็จ"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function safeImageSource(value) {
+      if (typeof value !== "string") return "";
+      if (/^data:image\/(jpeg|png|webp|gif);base64,/i.test(value)) {
+        return value;
+      }
+      try {
+        const url = new URL(value);
+        return ["https:", "http:"].includes(url.protocol) ? url.href : "";
+      } catch {
+        return "";
+      }
+    }
+
+    imageInput.addEventListener("change", () => {
+      resetPreview();
+      const file = imageInput.files[0];
+
+      if (!file) {
+        const source = safeImageSource(existingImage);
+        if (source) {
+          preview.src = source;
+          preview.style.display = "block";
+        }
+        return;
+      }
+
+      try {
+        validateImage(file);
+        previewURL = URL.createObjectURL(file);
+        preview.src = previewURL;
+        preview.style.display = "block";
+      } catch (error) {
+        imageInput.value = "";
+        notify(errorText(error), "error");
+      }
+    });
+
+    function makeButton(text, className, onClick) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = text;
+      button.className = className;
+      button.addEventListener("click", onClick);
+      return button;
+    }
+
+    function renderMenus() {
+      list.replaceChildren();
+
+      if (!menus.length) {
+        list.className = "empty";
+        list.textContent = "ยังไม่มีรายการเมนู";
+        return;
+      }
+
+      list.className = "";
+
+      menus.forEach(menu => {
+        const card = document.createElement("article");
+        card.className = "menu-card";
+
+        const info = document.createElement("div");
+        info.className = "menu-info";
+
+        const img = document.createElement("img");
+        img.className = "menu-image";
+        img.alt = menu.name || "ไม่มีรูป";
+        img.loading = "lazy";
+
+        const source = safeImageSource(menu.image);
+        if (source) img.src = source;
+        img.onerror = () => {
+          img.onerror = null;
+          img.removeAttribute("src");
+          img.alt = "รูปโหลดไม่ได้";
+        };
+
+        const details = document.createElement("div");
+
+        const name = document.createElement("span");
+        name.className = "menu-name";
+        name.textContent = menu.name || "ไม่มีชื่อเมนู";
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = menu.category || "ไม่ระบุหมวดหมู่";
+
+        const price = document.createElement("div");
+        price.className = "price";
+        const amount = Number(menu.price);
+        price.textContent = Number.isFinite(amount)
+          ? amount.toLocaleString("th-TH") + " บาท"
+          : "ไม่ระบุราคา";
+
+        details.append(name, badge, price);
+
+        const extras = Array.isArray(menu.extras) ? menu.extras : [];
+        const exclusions = Array.isArray(menu.exclusions)
+          ? menu.exclusions : [];
+
+        if (extras.length || exclusions.length) {
+          const summary = document.createElement("div");
+          summary.className = "option-summary";
+          const parts = [];
+
+          if (extras.length) {
+            parts.push("เพิ่ม: " + extras.map(item =>
+              `${item.name} (+${item.price} บาท)`
+            ).join(", "));
+          }
+          if (exclusions.length) {
+            parts.push("ไม่เอา: " + exclusions.join(", "));
+          }
+
+          summary.textContent = parts.join(" | ");
+          details.append(summary);
+        }
+
+        info.append(img, details);
+
+        const actions = document.createElement("div");
+        actions.className = "actions";
+        const available = menu.is_available !== false;
+
+        const sale = makeButton(
+          available ? "เปิดขาย" : "ปิดขาย",
+          available ? "sale-button" : "closed-button",
+          () => toggleSale(menu)
+        );
+        sale.title = available ? "คลิกเพื่อปิดขาย" : "คลิกเพื่อเปิดขาย";
+
+        actions.append(
+          sale,
+          makeButton("แก้ไข", "edit-button", () => editMenu(menu)),
+          makeButton("ลบ", "delete-button", () => deleteMenu(menu))
+        );
+
+        card.append(info, actions);
+        list.append(card);
+      });
+
+      list.querySelectorAll("button").forEach(button => {
+        button.disabled = busy;
+      });
+    }
+
+    async function loadMenus() {
+      if (!db) return false;
+      const version = ++loadVersion;
+
+      try {
+        const { data, error } = await db
+          .from("menus")
+          .select("*")
+          .order("id", { ascending: false });
+
+        if (version !== loadVersion) return false;
+        if (error) throw error;
+
+        menus = data || [];
+        renderMenus();
+        return true;
+      } catch (error) {
+        if (version !== loadVersion) return false;
+
+        if (!menus.length) {
+          list.className = "empty";
+          list.textContent = "โหลดรายการไม่สำเร็จ";
+        }
+
+        notify("โหลดเมนูไม่สำเร็จ: " + errorText(error), "error");
+        return false;
+      }
+    }
+
+    function editMenu(menu) {
+      if (busy) return;
+
+      resetForm();
+      editingId = menu.id;
+      existingImage = menu.image || null;
+
+      $("menuName").value = menu.name || "";
+      $("menuPrice").value = menu.price ?? "";
+
+      const category = menu.category || "อื่น ๆ";
+      const select = $("menuCategory");
+
+      if (![...select.options].some(option => option.value === category)) {
+        select.add(new Option(category, category));
+      }
+      select.value = category;
+
+      const extras = Array.isArray(menu.extras) ? menu.extras : [];
+      const exclusions = Array.isArray(menu.exclusions)
+        ? menu.exclusions : [];
+
+      extras.slice(0, 4).forEach((item, index) => {
+        extraNames[index].value = item.name || "";
+        extraPrices[index].value = item.price ?? 0;
+      });
+
+      exclusions.slice(0, 4).forEach((item, index) => {
+        excludeInputs[index].value = item;
+      });
+
+      const source = safeImageSource(existingImage);
+      if (source) {
+        preview.src = source;
+        preview.style.display = "block";
+      }
+
+      $("formTitle").textContent = "แก้ไขเมนูอาหาร";
+      saveButton.textContent = "บันทึกการแก้ไข";
+      $("cancelEdit").style.display = "block";
+      form.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function collectExtras() {
+      const extras = [];
+
+      extraNames.forEach((input, index) => {
+        const name = input.value.trim();
+        const rawPrice = extraPrices[index].value.trim();
+
+        if (!name && rawPrice) {
+          throw new Error(`กรุณาใส่ชื่อรายการเพิ่มช่องที่ ${index + 1}`);
+        }
+        if (!name) return;
+
+        const price = rawPrice === "" ? 0 : Number(rawPrice);
+        if (!Number.isFinite(price) || price < 0) {
+          throw new Error(`ราคารายการเพิ่มช่องที่ ${index + 1} ไม่ถูกต้อง`);
+        }
+
+        extras.push({ name, price });
+      });
+
+      return extras;
+    }
+
+    function verifyChanged(data) {
+      if (!data || data.length !== 1) {
+        throw new Error(
+          "ไม่มีแถวถูกเปลี่ยนแปลง อาจไม่มีสิทธิ์ หรือรายการถูกลบไปแล้ว"
+        );
+      }
+    }
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      if (busy || !db) return;
+
+      setBusy(true);
+      saveButton.textContent = "กำลังบันทึก...";
+
+      try {
+        const name = $("menuName").value.trim();
+        const rawPrice = $("menuPrice").value.trim();
+        const price = Number(rawPrice);
+
+        if (!name) throw new Error("กรุณากรอกชื่อเมนู");
+        if (!rawPrice || !Number.isFinite(price) || price < 0) {
+          throw new Error("กรุณากรอกราคาให้ถูกต้อง");
+        }
+
+        const extras = collectExtras();
+        const exclusions = excludeInputs
+          .map(input => input.value.trim())
+          .filter(Boolean);
+
+        const file = imageInput.files[0];
+        let image = existingImage;
+
+        if (file) {
+          validateImage(file);
+          image = await readImage(file);
+        }
+
+        const payload = {
+          name,
+          price,
+          image,
+          category: $("menuCategory").value,
+          extras,
+          exclusions
+        };
+
+        const wasEditing = editingId !== null;
+        let query;
+
+        if (wasEditing) {
+          query = db.from("menus")
+            .update(payload)
+            .eq("id", editingId)
+            .select("id");
+        } else {
+          query = db.from("menus")
+            .insert({ ...payload, is_available: true })
+            .select("id");
+        }
+
+        const { data, error } = await query;
+        if (error) throw error;
+        verifyChanged(data);
+
+        resetForm();
+
+        const loaded = await loadMenus();
+        if (loaded) {
+          notify(
+            wasEditing
+              ? "แก้ไขสำเร็จ และโหลดรายการล่าสุดแล้ว"
+              : "บันทึกสำเร็จ และแสดงเมนูใหม่แล้ว",
+            "success"
+          );
+        } else {
+          notify(
+            "บันทึกสำเร็จ แต่โหลดรายการใหม่ไม่สำเร็จ กรุณากดโหลดใหม่",
+            "error"
+          );
+        }
+      } catch (error) {
+        notify(
+          "บันทึกไม่สำเร็จ: " + errorText(error) +
+          "\nตรวจว่ารัน SQL เพิ่มคอลัมน์แล้ว และบัญชีมีสิทธิ์อ่าน/เขียน",
+          "error"
+        );
+      } finally {
+        setBusy(false);
+        saveButton.textContent = editingId !== null
+          ? "บันทึกการแก้ไข" : "บันทึกเมนู";
+      }
+    });
+
+    async function toggleSale(menu) {
+      if (busy || !db) return;
+      setBusy(true);
+
+      try {
+        const available = menu.is_available === false;
+
+        const { data, error } = await db.from("menus")
+          .update({ is_available: available })
+          .eq("id", menu.id)
+          .select("id");
+
+        if (error) throw error;
+        verifyChanged(data);
+
+        if (await loadMenus()) {
+          notify(
+            available ? "เปิดขายเมนูแล้ว" : "ปิดขายเมนูแล้ว",
+            "success"
+          );
+        }
+      } catch (error) {
+        notify("เปลี่ยนสถานะไม่สำเร็จ: " + errorText(error), "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    async function deleteMenu(menu) {
+      if (busy || !db) return;
+      if (!confirm(`ยืนยันลบเมนู "${menu.name}"?`)) return;
+
+      setBusy(true);
+
+      try {
+        const { data, error } = await db.from("menus")
+          .delete()
+          .eq("id", menu.id)
+          .select("id");
+
+        if (error) throw error;
+        verifyChanged(data);
+
+        if (editingId === menu.id) resetForm();
+        if (await loadMenus()) notify("ลบเมนูแล้ว", "success");
+      } catch (error) {
+        notify("ลบไม่สำเร็จ: " + errorText(error), "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    $("cancelEdit").addEventListener("click", () => {
+      if (!busy) resetForm();
+    });
+
+    reloadButton.addEventListener("click", async () => {
+      if (busy || !db) return;
+      setBusy(true);
+
+      try {
+        if (await loadMenus()) {
+          notify("โหลดรายการล่าสุดแล้ว", "success");
+        }
+      } finally {
+        setBusy(false);
+      }
+    });
+
+    async function start() {
+      try {
+        if (!window.supabase) {
+          throw new Error("โหลด Supabase library ไม่สำเร็จ ตรวจสอบอินเทอร์เน็ต");
+        }
+
+        if (
+          !SUPABASE_URL ||
+          !SUPABASE_KEY ||
+          !SUPABASE_KEY.trim()
+        ) {
+          throw new Error("กรุณาใส่ SUPABASE_URL และ SUPABASE_KEY จริงในโค้ด");
+        }
+
+        const url = new URL(SUPABASE_URL);
+        if (url.protocol !== "https:") {
+          throw new Error("Project URL ต้องขึ้นต้นด้วย https://");
+        }
+
+        db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        setBusy(true);
+        list.textContent = "กำลังโหลดรายการ...";
+
+        if (await loadMenus()) {
+          notify(`เชื่อมต่อแล้ว อ่านได้ ${menus.length} รายการ`, "info");
+        }
+      } catch (error) {
+        list.textContent = "ยังเชื่อมต่อไม่ได้";
+        notify(errorText(error), "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    start();
+  </script>
+</body>
+</html>

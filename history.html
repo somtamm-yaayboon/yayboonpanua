@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ร้านส้มตำแซ่บสะเดิด - ประวัติยอดขายและออร์เดอร์</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #f4f6f8;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-sub: #7f8c8d;
+            --primary: #d9534f;
+            --border-color: #eaecef;
+        }
+
+        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main); }
+        
+        .header { background: var(--card-bg); padding: 18px 25px; font-size: 20px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .header-badge { background: #e67e22; color: white; padding: 4px 12px; border-radius: 20px; font-size: 14px; }
+
+        .container { max-width: 1200px; margin: 25px auto; padding: 0 15px; }
+        
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .kpi-card { background: var(--card-bg); padding: 22px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .kpi-title { font-size: 14px; color: var(--text-sub); margin-bottom: 6px; font-weight: 500; }
+        .kpi-value { font-size: 26px; font-weight: bold; color: var(--primary); }
+
+        .card { background: var(--card-bg); border-radius: 16px; padding: 25px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.02); margin-bottom: 25px; }
+        .section-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        
+        .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+        select, input[type="date"] { padding: 9px 14px; border: 1px solid var(--border-color); border-radius: 10px; font-family: 'Sarabun', sans-serif; font-size: 14px; background: #fafbfc; color: var(--text-main); cursor: pointer; }
+        select:focus, input[type="date"]:focus { outline: none; border-color: var(--primary); }
+
+        .date-range-container { display: none; gap: 8px; align-items: center; }
+        .date-range-container.active { display: flex; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { background: #f8f9fa; font-weight: bold; color: var(--text-main); cursor: pointer; user-select: none; transition: background 0.2s; }
+        th:hover { background: #edf2f7; }
+        th::after { content: " ↕"; font-size: 11px; color: #a0aec0; }
+        
+        .badge-type { padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: bold; background: #edf2f7; color: #4a5568; }
+        .empty-state { text-align: center; color: var(--text-sub); padding: 40px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span>📈 ร้านส้มตำแซ่บสะเดิด - ประวัติการขายและยอดออร์เดอร์</span>
+    <span class="header-badge">● รายงานย้อนหลัง</span>
+</div>
+
+<div class="container">
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-title">💰 ยอดขายรวมตามช่วงเวลาที่เลือก</div>
+            <div class="kpi-value" id="kpiTotalSales">0 บาท</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-title">📋 ออร์เดอร์ที่สำเร็จทั้งหมด</div>
+            <div class="kpi-value" id="kpiTotalOrders" style="color: #3498db;">0 รายการ</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="section-title">
+            <span>ประวัติรายการขายทั้งหมดจากฐานข้อมูล</span>
+            <div class="filter-bar">
+                <label style="font-size: 14px; color: var(--text-sub);">ช่วงเวลา:</label>
+                <select id="filterPeriod" onchange="handlePeriodChange()">
+                    <option value="all">ทั้งหมด (ทุกช่วงเวลา)</option>
+                    <option value="day">วันนี้</option>
+                    <option value="month">เดือนนี้</option>
+                    <option value="year">ปีนี้</option>
+                    <option value="custom">กำหนดช่วงวันที่เอง</option>
+                </select>
+
+                <!-- ช่องเลือกวันที่แบบกำหนดเอง (ซ่อนไว้ก่อนจนกว่าจะเลือก Custom) -->
+                <div id="customDateRange" class="date-range-container">
+                    <input type="date" id="startDate" onchange="filterSalesData()">
+                    <span style="color: var(--text-sub); font-size: 14px;">ถึง</span>
+                    <input type="date" id="endDate" onchange="filterSalesData()">
+                </div>
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th onclick="sortTable('id')">รหัสออร์เดอร์</th>
+                        <th onclick="sortTable('created_at')">วัน-เวลา</th>
+                        <th onclick="sortTable('order_type')">ประเภท</th>
+                        <th onclick="sortTable('customer_name')">ลูกค้า / โต๊ะ</th>
+                        <th onclick="sortTable('total_price')">ยอดเงิน (บาท)</th>
+                        <th onclick="sortTable('status')">สถานะ</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    <tr><td colspan="6" class="empty-state">กำลังเชื่อมต่อฐานข้อมูล...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const SUPABASE_URL = "https://zlhgzcvzwvkyaklajkmi.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_2PpazCOtie3x28WsnUfu8g_w3hOqSEk";
+
+    let db = null;
+    let allOrders = [];
+    let currentSortColumn = 'id';
+    let sortDirection = 'desc';
+
+    window.onload = async () => {
+        try {
+            if (window.supabase) {
+                db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+                await fetchHistoryOrders();
+                
+                db.channel('public:orders-history')
+                  .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+                      fetchHistoryOrders();
+                  })
+                  .subscribe();
+
+                setInterval(fetchHistoryOrders, 10000);
+            } else {
+                document.getElementById('historyTableBody').innerHTML = '<tr><td colspan="6" class="empty-state" style="color:red;">ไม่สามารถโหลดไลบรารี Supabase ได้</td></tr>';
+            }
+        } catch (err) {
+            console.error(err);
+        }
+    };
+
+    async function fetchHistoryOrders() {
+        const { data, error } = await db
+            .from('orders')
+            .select('*')
+            .order('id', { ascending: false });
+
+        if (error) {
+            console.error("Error fetching history:", error);
+            document.getElementById('historyTableBody').innerHTML = `<tr><td colspan="6" class="empty-state" style="color:red;">เกิดข้อผิดพลาด: ${error.message}</td></tr>`;
+            return;
+        }
+
+        allOrders = data || [];
+        filterSalesData();
+    }
+
+    function handlePeriodChange() {
+        const period = document.getElementById('filterPeriod').value;
+        const customContainer = document.getElementById('customDateRange');
+
+        if (period === 'custom') {
+            customContainer.classList.add('active');
+            // กำหนดค่าเริ่มต้นให้ช่องวันที่เป็นวันปัจจุบันหากยังไม่เคยเลือก
+            const todayStr = new Date().toISOString().split('T')[0];
+            if (!document.getElementById('startDate').value) document.getElementById('startDate').value = todayStr;
+            if (!document.getElementById('endDate').value) document.getElementById('endDate').value = todayStr;
+        } else {
+            customContainer.classList.remove('active');
+        }
+        filterSalesData();
+    }
+
+    function filterSalesData() {
+        const period = document.getElementById('filterPeriod').value;
+        const now = new Date();
+
+        const filtered = allOrders.filter(order => {
+            const orderDate = new Date(order.created_at);
+
+            if (period === 'day') {
+                return orderDate.toDateString() === now.toDateString();
+            } else if (period === 'month') {
+                return orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear();
+            } else if (period === 'year') {
+                return orderDate.getFullYear() === now.getFullYear();
+            } else if (period === 'custom') {
+                const startVal = document.getElementById('startDate').value;
+                const endVal = document.getElementById('endDate').value;
+                if (!startVal || !endVal) return true;
+
+                const startDate = new Date(startVal);
+                startDate.setHours(0, 0, 0, 0);
+
+                const endDate = new Date(endVal);
+                endDate.setHours(23, 59, 59, 999);
+
+                return orderDate >= startDate && orderDate <= endDate;
+            }
+            return true;
+        });
+
+        renderHistoryTable(filtered);
+    }
+
+    function renderHistoryTable(dataList) {
+        const validOrders = dataList.filter(o => o.status !== 'cancelled');
+        const totalSales = validOrders.reduce((sum, o) => sum + (o.total_price || 0), 0);
+        
+        document.getElementById('kpiTotalSales').innerText = totalSales.toLocaleString() + ' บาท';
+        document.getElementById('kpiTotalOrders').innerText = validOrders.length.toLocaleString() + ' รายการ';
+
+        dataList.sort((a, b) => {
+            let valA = a[currentSortColumn];
+            let valB = b[currentSortColumn];
+
+            if (currentSortColumn === 'created_at') {
+                valA = new Date(valA);
+                valB = new Date(valB);
+            } else if (typeof valA === 'string') {
+                valA = (valA || '').toLowerCase();
+                valB = (valB || '').toLowerCase();
+            }
+
+            if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+            if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+            return 0;
+        });
+
+        const tbody = document.getElementById('historyTableBody');
+        if (dataList.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="empty-state">ไม่พบข้อมูลออร์เดอร์ในช่วงเวลาที่เลือก</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = '';
+        dataList.forEach(order => {
+            const dateStr = new Date(order.created_at).toLocaleString('th-TH', {
+                year: 'numeric', month: '2-digit', day: '2-digit',
+                hour: '2-digit', minute: '2-digit'
+            });
+
+            let typeBadge = '<span class="badge-type">🍽️ ทานที่ร้าน</span>';
+            if (order.order_type === 'takeaway') typeBadge = '<span class="badge-type" style="background:#eef2f7; color:#3b82f6;">🛍️ กลับบ้าน</span>';
+            if (order.order_type === 'delivery') typeBadge = '<span class="badge-type" style="background:#fef3c7; color:#d97706;">🛵 เดลิเวอรี</span>';
+
+            let statusHtml = order.status;
+            if (order.status === 'pending' || order.status === 'รอทำ') statusHtml = '<span style="color: #f39c12; font-weight: bold;">⏳ รอทำ</span>';
+            else if (order.status === 'cooking' || order.status === 'กำลังทำ') statusHtml = '<span style="color: #3498db; font-weight: bold;">🔥 กำลังทำ</span>';
+            else if (order.status === 'done' || order.status === 'completed') statusHtml = '<span style="color: #27ae60; font-weight: bold;">✅ สำเร็จ</span>';
+            else if (order.status === 'cancelled') statusHtml = '<span style="color: #e74c3c; font-weight: bold;">❌ ยกเลิก</span>';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>#${order.id}</td>
+                    <td>${dateStr}</td>
+                    <td>${typeBadge}</td>
+                    <td><b>${order.customer_name || '-'}</b></td>
+                    <td><b>${(order.total_price || 0).toLocaleString()} ฿</b></td>
+                    <td>${statusHtml}</td>
+                </tr>
+            `;
+        });
+    }
+
+    function sortTable(column) {
+        if (currentSortColumn === column) {
+            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            currentSortColumn = column;
+            sortDirection = 'asc';
+        }
+        filterSalesData();
+    }
+</script>
+
+</body>
+</html>
