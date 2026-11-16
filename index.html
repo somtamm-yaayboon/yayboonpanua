@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ร้านส้มตำแซ่บสะเดิด - สั่งอาหาร</title>
+    <title>ร้านส้มตำยายบุรณ์พานัว - สั่งอาหาร</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -301,66 +301,124 @@
         );
     }
 
-    async function checkOrderStatus() {
-        if (!activeOrderId) return;
+    let checkingOrderStatus = false;
 
+async function checkOrderStatus() {
+    if (!activeOrderId || checkingOrderStatus) return;
+    checkingOrderStatus = true;
+
+    const tracker = document.getElementById('statusTracker');
+    const queueNumber = document.getElementById('my-queue-number');
+    const queueLabel = document.getElementById('tracker-queue-label');
+    const queueText = document.getElementById('tracker-queue-no');
+    const statusText = document.getElementById('tracker-status-text');
+
+    // ต้องตรงกับสถานะที่หน้าครัวบันทึก
+    const waitingStatuses = [
+        'pending', 'cooking', 'กำลังทำ', 'รอทำ', 'รอตรวจสอบ'
+    ];
+    const finishedStatuses = [
+        'done', 'completed', 'เสร็จสิ้น', 'พร้อมเสิร์ฟ'
+    ];
+    const cancelledStatuses = [
+        'cancelled', 'canceled', 'ยกเลิก'
+    ];
+
+    try {
         const { data: currentOrder, error } = await db
             .from('orders')
             .select('id, queue_no, status, created_at')
             .eq('id', activeOrderId)
-            .single();
+            .maybeSingle();
 
-        if (error || !currentOrder) {
+        if (error) throw error;
+
+        if (!currentOrder) {
+            activeOrderId = null;
             localStorage.removeItem('zaap_active_order_id');
-            document.getElementById('statusTracker').style.display = 'none';
+            tracker.style.display = 'none';
             return;
         }
 
-        document.getElementById('statusTracker').style.display = 'block';
+        tracker.style.display = 'block';
+        const status = String(currentOrder.status || '')
+            .trim()
+            .toLowerCase();
 
-        const st = (currentOrder.status || '').toLowerCase();
-        let statusText = 'กำลังรอทำ';
+        const time = new Date(currentOrder.created_at);
+        document.getElementById('tracker-time').textContent =
+            Number.isNaN(time.getTime())
+                ? '-'
+                : time.toLocaleTimeString('th-TH', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: false
+                });
 
-        const { data: aheadOrders } = await db
-            .from('orders')
-            .select('id, status')
-            .lt('id', currentOrder.id)
-            .in('status', ['pending', 'cooking', 'กำลังทำ', 'รอทำ', 'รอตรวจสอบ']);
-
-        const waitingCount = aheadOrders ? aheadOrders.length : 0;
-        const myRelativeQueueNo = waitingCount + 1;
-
-        document.getElementById('my-queue-number').innerText = myRelativeQueueNo;
-
-        if (st === 'done' || st === 'เสร็จสิ้น' || st === 'พร้อมเสิร์ฟ' || st === 'completed') {
-            statusText = '✅ พร้อมเสิร์ฟ / รับอาหารแล้ว';
-            document.getElementById('tracker-queue-label').innerText = 'สถานะคิวของคุณ';
-            document.getElementById('tracker-queue-no').innerText = `✨ อาหารเสร็จแล้ว!`;
-        } else {
-            if (waitingCount === 0) {
-                document.getElementById('tracker-queue-label').innerText = 'สถานะคิว';
-                document.getElementById('tracker-queue-no').innerText = `🔥 กำลังทำคิวของคุณอยู่ (คิวที่ 1)`;
-            } else {
-                document.getElementById('tracker-queue-label').innerText = 'สถานะคิวปัจจุบัน';
-                document.getElementById('tracker-queue-no').innerText = `เป็นคิวที่ ${myRelativeQueueNo} (รออีก ${waitingCount} คิว)`;
-            }
-
-            if (st === 'cooking' || st === 'กำลังทำ') {
-                statusText = '🔥 กำลังทำอาหาร';
-            } else {
-                statusText = '⏳ กำลังรอคิวในครัว';
-            }
+        if (cancelledStatuses.includes(status)) {
+            queueNumber.textContent = '-';
+            queueLabel.textContent = 'สถานะออร์เดอร์';
+            queueText.textContent = 'ออร์เดอร์ถูกยกเลิก';
+            statusText.textContent = 'รายการนี้ไม่อยู่ในคิวแล้ว';
+            return;
         }
 
-        document.getElementById('tracker-status-text').innerText = statusText;
-        
-        const orderDate = new Date(currentOrder.created_at);
-        document.getElementById('tracker-time').innerText = orderDate.toLocaleTimeString('th-TH', {
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: false
-        });
+        if (finishedStatuses.includes(status)) {
+            queueNumber.textContent = '✓';
+            queueLabel.textContent = 'สถานะออร์เดอร์';
+            queueText.textContent = 'อาหารเสร็จแล้ว';
+            statusText.textContent = 'พร้อมเสิร์ฟ / รับอาหารแล้ว';
+            return;
+        }
+
+        if (!waitingStatuses.includes(status)) {
+            queueNumber.textContent = '-';
+            queueLabel.textContent = 'สถานะออร์เดอร์';
+            queueText.textContent = 'กำลังตรวจสอบสถานะ';
+            statusText.textContent = currentOrder.status || 'ไม่ทราบสถานะ';
+            return;
+        }
+
+        // นับเฉพาะออร์เดอร์ก่อนหน้าที่ยังทำไม่เสร็จ
+        // ใช้ลำดับ id แบบเดียวกับโค้ดเดิม
+        const { count, error: countError } = await db
+            .from('orders')
+            .select('id', { count: 'exact', head: true })
+            .lt('id', currentOrder.id)
+            .in('status', waitingStatuses);
+
+        if (countError) throw countError;
+
+        const aheadCount = count ?? 0;
+        const position = aheadCount + 1;
+        const isCooking = ['cooking', 'กำลังทำ'].includes(status);
+
+        queueNumber.textContent = position;
+        queueLabel.textContent = 'ลำดับรอปัจจุบัน';
+
+        if (isCooking) {
+            queueText.textContent = 'ครัวกำลังทำอาหารของคุณ';
+            statusText.textContent = 'กำลังทำอาหาร';
+        } else if (aheadCount === 0) {
+            queueText.textContent = 'คิวถัดไปเป็นของคุณ';
+            statusText.textContent = 'รอครัวเริ่มทำอาหาร';
+        } else {
+            queueText.textContent =
+                `ลำดับที่ ${position} · มี ${aheadCount} ออร์เดอร์ก่อนคุณ`;
+            statusText.textContent = 'กำลังรอคิวในครัว';
+        }
+    } catch (err) {
+        console.error('ตรวจสอบคิวไม่สำเร็จ:', err);
+        if (tracker) tracker.style.display = 'block';
+        if (queueNumber) queueNumber.textContent = '-';
+        if (queueText) queueText.textContent = 'ยังตรวจสอบคิวไม่ได้';
+        if (statusText) {
+            statusText.textContent = 'กำลังรอเชื่อมต่อ กรุณาลองใหม่';
+        }
+    } finally {
+        checkingOrderStatus = false;
     }
+}
 
     async function loadCustomerMenus() {
         const menuListContainer = document.getElementById('menuList');
@@ -672,7 +730,7 @@
                 console.error("Supabase Error:", error);
                 alert('บันทึกออร์เดอร์ไม่สำเร็จ: ' + error.message);
             } else {
-                alert(`ส่งออร์เดอร์สำเร็จ! 🎉\nคุณได้รับหมายเลขคิวที่: #${nextQueueNo}`);
+                alert('ส่งออร์เดอร์สำเร็จ!\nดูลำดับรอปัจจุบันได้ที่แถบติดตามออร์เดอร์');
                 
                 if (insertedData && insertedData.length > 0) {
                     activeOrderId = insertedData[0].id;
