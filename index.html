@@ -1120,7 +1120,7 @@
                 console.error("Supabase Error:", error);
                 alert('บันทึกออร์เดอร์ไม่สำเร็จ: ' + error.message);
             } else {
-                alert(`ส่งออร์เดอร์สำเร็จ! 🎉\nคุณได้รับหมายเลขคิวที่: #${nextQueueNo}`);
+                alert('ส่งออร์เดอร์สำเร็จ!\nดูลำดับรอปัจจุบันได้ที่แถบติดตามออร์เดอร์');
                 
                 if (insertedData && insertedData.length > 0) {
                     activeOrderId = insertedData[0].id;
