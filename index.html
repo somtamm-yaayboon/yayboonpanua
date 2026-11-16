@@ -3,7 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ร้านส้มตำยายบุรณ์พานัว - สั่งอาหาร</title>
+    <title>ร้านส้มตำยายบูรณ์พานัว - สั่งอาหาร</title>
+    <!-- เพิ่มลิงก์ฟอนต์ Sarabun จาก Google Fonts เพื่อให้อ่านง่ายและสวยงาม -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
@@ -16,76 +20,88 @@
             --border-color: #eaecef;
         }
 
-        body { font-family: 'Sarabun', sans-serif; background-color: var(--bg-color); margin: 0; padding: 0; color: var(--text-main); }
+        body { 
+            font-family: 'Sarabun', sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            padding: 0; 
+            color: var(--text-main); 
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
         
         .header { background: var(--card-bg); padding: 18px 20px; font-size: 18px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
         
         .container { max-width: 600px; margin: 20px auto; padding: 0 15px 120px 15px; }
         
-        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-bottom: 20px; }
+        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-bottom: 20px; text-align: left; }
         
-        .section-title { font-size: 15px; font-weight: bold; margin-bottom: 12px; color: var(--text-main); }
+        .section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--text-main); text-align: left; }
         
         .order-types { display: flex; gap: 10px; margin-bottom: 15px; }
-        .type-btn { flex: 1; padding: 10px; border: 1px solid var(--border-color); background: #fdfdfe; border-radius: 10px; cursor: pointer; text-align: center; font-weight: 500; color: var(--text-sub); transition: all 0.2s; }
+        .type-btn { flex: 1; padding: 10px; border: 1px solid var(--border-color); background: #fdfdfe; border-radius: 10px; cursor: pointer; text-align: center; font-weight: 600; font-family: 'Sarabun', sans-serif; font-size: 14px; color: var(--text-sub); transition: all 0.2s; }
         .type-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(217,83,79,0.2); }
         
         /* แท็บหมวดหมู่สินค้า (Categories) */
         .category-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 15px; scrollbar-width: none; }
         .category-tabs::-webkit-scrollbar { display: none; }
-        .cat-btn { background: #edf2f7; border: none; padding: 7px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-sub); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
+        .cat-btn { background: #edf2f7; border: none; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; font-family: 'Sarabun', sans-serif; color: var(--text-sub); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
         .cat-btn.active { background: var(--text-main); color: white; }
 
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 6px; font-size: 14px; color: var(--text-sub); }
+        .form-group { margin-bottom: 15px; text-align: left; }
+        label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: var(--text-sub); text-align: left; }
         input, select, textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border-color); border-radius: 10px; box-sizing: border-box; font-family: 'Sarabun', sans-serif; background: #fafbfc; color: var(--text-main); font-size: 14px; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
         
-        .btn-location { background-color: #3498db; color: white; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; width: 100%; justify-content: center; box-shadow: 0 2px 6px rgba(52,152,219,0.2); }
+        .btn-location { background-color: #3498db; color: white; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; font-family: 'Sarabun', sans-serif; margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; width: 100%; justify-content: center; box-shadow: 0 2px 6px rgba(52,152,219,0.2); }
         .btn-location:hover { background-color: #2980b9; }
 
-        .menu-item { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.01); transition: transform 0.1s; }
+        /* ปรับปรุงการแสดงผลรายการเมนูให้อ่านง่าย ไม่ตัดคำเป็นแนวตั้ง */
+        .menu-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--card-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.01); transition: transform 0.1s; text-align: left; }
         .menu-item:hover { border-color: #d0d7de; }
-        .menu-info { display: flex; align-items: center; gap: 14px; }
+        .menu-info { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; text-align: left; }
         .menu-img { width: 75px; height: 75px; border-radius: 10px; object-fit: cover; background: #eee; flex-shrink: 0; cursor: pointer; transition: opacity 0.2s; }
         .menu-img:hover { opacity: 0.85; }
-        .menu-name { font-weight: bold; font-size: 15px; margin-bottom: 4px; color: var(--text-main); }
-        .menu-price { color: var(--primary); font-size: 14px; font-weight: bold; }
-        .btn-order { background-color: #fff; color: var(--primary); border: 1.5px solid var(--primary); padding: 7px 16px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 13px; flex-shrink: 0; transition: all 0.2s; }
+        .menu-details { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; justify-content: center; }
+        .menu-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; color: var(--text-main); line-height: 1.35; word-break: normal; overflow-wrap: break-word; text-align: left; }
+        .menu-category { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
+        .menu-price { color: var(--primary); font-size: 15px; font-weight: 700; white-space: nowrap; text-align: left; }
+        .btn-order { background-color: #fff; color: var(--primary); border: 1.5px solid var(--primary); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-family: 'Sarabun', sans-serif; font-size: 14px; flex-shrink: 0; white-space: nowrap; transition: all 0.2s; }
         .btn-order:hover { background-color: var(--primary); color: white; }
 
         .empty-menu { text-align: center; color: var(--text-sub); padding: 25px; font-size: 14px; }
         
-        .floating-cart { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 15px 20px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .cart-summary-btn { background: #2c3e50; color: white; border: none; padding: 12px 25px; border-radius: 30px; font-weight: bold; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(44,62,80,0.2); display: flex; align-items: center; gap: 10px; transition: background 0.2s; }
+        /* ปรับปรุงปุ่มตะกร้าสินค้าด้านล่างให้ข้อความเรียงสวยงามในบรรทัดเดียว */
+        .floating-cart { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 12px 15px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; z-index: 100; }
+        .cart-summary-btn { background: #2c3e50; color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 700; font-family: 'Sarabun', sans-serif; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(44,62,80,0.2); display: inline-block; text-align: center; white-space: nowrap; width: 100%; max-width: 400px; transition: background 0.2s; }
         .cart-summary-btn:hover { background: #34495e; }
         
-        .status-tracker-card { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(44,62,80,0.15); display: none; }
+        .status-tracker-card { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(44,62,80,0.15); display: none; text-align: left; }
         .tracker-header { display: flex; justify-content: space-between; align-items: center; font-size: 14px; opacity: 0.85; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 12px; }
         .tracker-body { display: flex; justify-content: space-between; align-items: center; }
-        .tracker-queue { font-size: 22px; font-weight: bold; }
-        .tracker-status { background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        .tracker-queue { font-size: 20px; font-weight: bold; }
+        .tracker-status { background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; white-space: nowrap; }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
-        .modal-content { background: var(--card-bg); width: 90%; max-width: 420px; border-radius: 16px; padding: 22px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .modal-content { background: var(--card-bg); width: 90%; max-width: 420px; border-radius: 16px; padding: 22px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: left; }
         .modal-header { font-size: 17px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
         
-        .option-section { margin-bottom: 15px; background: #f8f9fa; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); }
-        .option-title { font-weight: bold; font-size: 13px; color: var(--primary); display: block; margin-bottom: 8px; }
+        .option-section { margin-bottom: 15px; background: #f8f9fa; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); text-align: left; }
+        .option-title { font-weight: bold; font-size: 13px; color: var(--primary); display: block; margin-bottom: 8px; text-align: left; }
         .checkbox-label { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; cursor: pointer; text-align: left; }
-        .checkbox-label input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; margin: 0; }
+        .checkbox-label input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; margin: 0; flex-shrink: 0; }
         
         .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #e2e8f0; color: #475569; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-size: 14px; text-align: center; }
-        .btn-confirm { background: #27ae60; color: white; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-size: 14px; text-align: center; }
-        .btn-secondary { background: #e2e8f0; color: #475569; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-size: 14px; text-align: center; }
+        .btn-cancel { background: #e2e8f0; color: #475569; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-family: 'Sarabun', sans-serif; font-size: 14px; text-align: center; }
+        .btn-confirm { background: #27ae60; color: white; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-family: 'Sarabun', sans-serif; font-size: 14px; text-align: center; }
+        .btn-secondary { background: #e2e8f0; color: #475569; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-family: 'Sarabun', sans-serif; font-size: 14px; text-align: center; }
 
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; }
-        .cart-item-details { flex: 1; margin-right: 10px; }
+        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: left; }
+        .cart-item-details { flex: 1; margin-right: 10px; text-align: left; }
         .cart-item-name { font-weight: bold; color: var(--text-main); }
         .cart-item-sub { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
         .cart-item-price { font-weight: bold; color: var(--primary); white-space: nowrap; margin-right: 10px; }
-        .btn-remove-item { background: #ff4d4d; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; }
+        .btn-remove-item { background: #ff4d4d; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: 'Sarabun', sans-serif; flex-shrink: 0; }
 
         .image-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
         .image-modal img { max-width: 90%; max-height: 80vh; border-radius: 12px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
@@ -96,7 +112,7 @@
 <body>
 
 <div class="header">
-    <span>🍽️ ร้านส้มตำยายบุรณ์พานัว</span>
+    <span>🍽️ ร้านส้มตำยายบูรณ์พานัว</span>
     <span id="table-badge" style="font-size: 13px; background: #f1f3f5; color: #495057; padding: 4px 10px; border-radius: 6px; font-weight: normal;"></span>
 </div>
 
@@ -301,124 +317,66 @@
         );
     }
 
-    let checkingOrderStatus = false;
+    async function checkOrderStatus() {
+        if (!activeOrderId) return;
 
-async function checkOrderStatus() {
-    if (!activeOrderId || checkingOrderStatus) return;
-    checkingOrderStatus = true;
-
-    const tracker = document.getElementById('statusTracker');
-    const queueNumber = document.getElementById('my-queue-number');
-    const queueLabel = document.getElementById('tracker-queue-label');
-    const queueText = document.getElementById('tracker-queue-no');
-    const statusText = document.getElementById('tracker-status-text');
-
-    // ต้องตรงกับสถานะที่หน้าครัวบันทึก
-    const waitingStatuses = [
-        'pending', 'cooking', 'กำลังทำ', 'รอทำ', 'รอตรวจสอบ'
-    ];
-    const finishedStatuses = [
-        'done', 'completed', 'เสร็จสิ้น', 'พร้อมเสิร์ฟ'
-    ];
-    const cancelledStatuses = [
-        'cancelled', 'canceled', 'ยกเลิก'
-    ];
-
-    try {
         const { data: currentOrder, error } = await db
             .from('orders')
             .select('id, queue_no, status, created_at')
             .eq('id', activeOrderId)
-            .maybeSingle();
+            .single();
 
-        if (error) throw error;
-
-        if (!currentOrder) {
-            activeOrderId = null;
+        if (error || !currentOrder) {
             localStorage.removeItem('zaap_active_order_id');
-            tracker.style.display = 'none';
+            document.getElementById('statusTracker').style.display = 'none';
             return;
         }
 
-        tracker.style.display = 'block';
-        const status = String(currentOrder.status || '')
-            .trim()
-            .toLowerCase();
+        document.getElementById('statusTracker').style.display = 'block';
 
-        const time = new Date(currentOrder.created_at);
-        document.getElementById('tracker-time').textContent =
-            Number.isNaN(time.getTime())
-                ? '-'
-                : time.toLocaleTimeString('th-TH', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                });
+        const st = (currentOrder.status || '').toLowerCase();
+        let statusText = 'กำลังรอทำ';
 
-        if (cancelledStatuses.includes(status)) {
-            queueNumber.textContent = '-';
-            queueLabel.textContent = 'สถานะออร์เดอร์';
-            queueText.textContent = 'ออร์เดอร์ถูกยกเลิก';
-            statusText.textContent = 'รายการนี้ไม่อยู่ในคิวแล้ว';
-            return;
-        }
-
-        if (finishedStatuses.includes(status)) {
-            queueNumber.textContent = '✓';
-            queueLabel.textContent = 'สถานะออร์เดอร์';
-            queueText.textContent = 'อาหารเสร็จแล้ว';
-            statusText.textContent = 'พร้อมเสิร์ฟ / รับอาหารแล้ว';
-            return;
-        }
-
-        if (!waitingStatuses.includes(status)) {
-            queueNumber.textContent = '-';
-            queueLabel.textContent = 'สถานะออร์เดอร์';
-            queueText.textContent = 'กำลังตรวจสอบสถานะ';
-            statusText.textContent = currentOrder.status || 'ไม่ทราบสถานะ';
-            return;
-        }
-
-        // นับเฉพาะออร์เดอร์ก่อนหน้าที่ยังทำไม่เสร็จ
-        // ใช้ลำดับ id แบบเดียวกับโค้ดเดิม
-        const { count, error: countError } = await db
+        const { data: aheadOrders } = await db
             .from('orders')
-            .select('id', { count: 'exact', head: true })
+            .select('id, status')
             .lt('id', currentOrder.id)
-            .in('status', waitingStatuses);
+            .in('status', ['pending', 'cooking', 'กำลังทำ', 'รอทำ', 'รอตรวจสอบ']);
 
-        if (countError) throw countError;
+        const waitingCount = aheadOrders ? aheadOrders.length : 0;
+        const myRelativeQueueNo = waitingCount + 1;
 
-        const aheadCount = count ?? 0;
-        const position = aheadCount + 1;
-        const isCooking = ['cooking', 'กำลังทำ'].includes(status);
+        document.getElementById('my-queue-number').innerText = myRelativeQueueNo;
 
-        queueNumber.textContent = position;
-        queueLabel.textContent = 'ลำดับรอปัจจุบัน';
-
-        if (isCooking) {
-            queueText.textContent = 'ครัวกำลังทำอาหารของคุณ';
-            statusText.textContent = 'กำลังทำอาหาร';
-        } else if (aheadCount === 0) {
-            queueText.textContent = 'คิวถัดไปเป็นของคุณ';
-            statusText.textContent = 'รอครัวเริ่มทำอาหาร';
+        if (st === 'done' || st === 'เสร็จสิ้น' || st === 'พร้อมเสิร์ฟ' || st === 'completed') {
+            statusText = '✅ พร้อมเสิร์ฟ / รับอาหารแล้ว';
+            document.getElementById('tracker-queue-label').innerText = 'สถานะคิวของคุณ';
+            document.getElementById('tracker-queue-no').innerText = `✨ อาหารเสร็จแล้ว!`;
         } else {
-            queueText.textContent =
-                `ลำดับที่ ${position} · มี ${aheadCount} ออร์เดอร์ก่อนคุณ`;
-            statusText.textContent = 'กำลังรอคิวในครัว';
+            if (waitingCount === 0) {
+                document.getElementById('tracker-queue-label').innerText = 'สถานะคิว';
+                document.getElementById('tracker-queue-no').innerText = `🔥 กำลังทำคิวของคุณอยู่ (คิวที่ 1)`;
+            } else {
+                document.getElementById('tracker-queue-label').innerText = 'สถานะคิวปัจจุบัน';
+                document.getElementById('tracker-queue-no').innerText = `เป็นคิวที่ ${myRelativeQueueNo} (รออีก ${waitingCount} คิว)`;
+            }
+
+            if (st === 'cooking' || st === 'กำลังทำ') {
+                statusText = '🔥 กำลังทำอาหาร';
+            } else {
+                statusText = '⏳ กำลังรอคิวในครัว';
+            }
         }
-    } catch (err) {
-        console.error('ตรวจสอบคิวไม่สำเร็จ:', err);
-        if (tracker) tracker.style.display = 'block';
-        if (queueNumber) queueNumber.textContent = '-';
-        if (queueText) queueText.textContent = 'ยังตรวจสอบคิวไม่ได้';
-        if (statusText) {
-            statusText.textContent = 'กำลังรอเชื่อมต่อ กรุณาลองใหม่';
-        }
-    } finally {
-        checkingOrderStatus = false;
+
+        document.getElementById('tracker-status-text').innerText = statusText;
+        
+        const orderDate = new Date(currentOrder.created_at);
+        document.getElementById('tracker-time').innerText = orderDate.toLocaleTimeString('th-TH', {
+            hour: '2-digit', 
+            minute: '2-digit',
+            hour12: false
+        });
     }
-}
 
     async function loadCustomerMenus() {
         const menuListContainer = document.getElementById('menuList');
@@ -481,9 +439,9 @@ async function checkOrderStatus() {
             itemDiv.innerHTML = `
                 <div class="menu-info">
                     <img src="${imgSrc}" class="menu-img" alt="${menu.name}" onclick="openImageModal('${imgSrc}', '${menu.name}')" onerror="this.src='https://images.unsplash.com/photo-1553163147-622ab57b1c2?w=150'">
-                    <div>
+                    <div class="menu-details">
                         <div class="menu-name">${menu.name}</div>
-                        <div style="font-size: 11px; color: var(--text-sub); margin-bottom: 2px;">📁 ${menu.category || 'ทั่วไป'}</div>
+                        <div class="menu-category">📁 ${menu.category || 'ทั่วไป'}</div>
                         <div class="menu-price">${menu.price} บาท</div>
                     </div>
                 </div>
@@ -544,7 +502,7 @@ async function checkOrderStatus() {
                         extrasContainer.innerHTML += `
                             <label class="checkbox-label">
                                 <input type="checkbox" name="modal-extra" value="${extraName}" data-price="${extraPrice}">
-                                เพิ่ม ${extraName} (+${extraPrice} บาท)
+                                <span>เพิ่ม ${extraName} (+${extraPrice} บาท)</span>
                             </label>
                         `;
                     }
@@ -569,7 +527,7 @@ async function checkOrderStatus() {
                     exclusionsContainer.innerHTML += `
                         <label class="checkbox-label">
                             <input type="checkbox" name="modal-exclude" value="${excName}">
-                            ไม่ใส่ ${excName}
+                            <span>ไม่ใส่ ${excName}</span>
                         </label>
                     `;
                 }
@@ -730,7 +688,7 @@ async function checkOrderStatus() {
                 console.error("Supabase Error:", error);
                 alert('บันทึกออร์เดอร์ไม่สำเร็จ: ' + error.message);
             } else {
-                alert('ส่งออร์เดอร์สำเร็จ!\nดูลำดับรอปัจจุบันได้ที่แถบติดตามออร์เดอร์');
+                alert(`ส่งออร์เดอร์สำเร็จ! 🎉\nคุณได้รับหมายเลขคิวที่: #${nextQueueNo}`);
                 
                 if (insertedData && insertedData.length > 0) {
                     activeOrderId = insertedData[0].id;
