@@ -2,9 +2,10 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- เพิ่ม viewport-fit=cover เพื่อรองรับหน้าจอ iPhone รุ่นไร้ปุ่มโฮม -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>ร้านส้มตำยายบูรณ์พานัว - สั่งอาหาร</title>
-    <!-- เพิ่มลิงก์ฟอนต์ Sarabun จาก Google Fonts เพื่อให้อ่านง่ายและสวยงาม -->
+    <!-- ลิงก์ฟอนต์ Sarabun จาก Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,85 +29,514 @@
             color: var(--text-main); 
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            -webkit-text-size-adjust: 100%;
         }
         
-        .header { background: var(--card-bg); padding: 18px 20px; font-size: 18px; font-weight: bold; box-shadow: 0 1px 3px rgba(0,0,0,0.04); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+        .header { 
+            background: var(--card-bg); 
+            padding: 16px 18px; 
+            font-size: 18px; 
+            font-weight: bold; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04); 
+            border-bottom: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
         
-        .container { max-width: 600px; margin: 20px auto; padding: 0 15px 120px 15px; }
+        .container { 
+            max-width: 600px; 
+            margin: 15px auto; 
+            padding: 0 12px calc(120px + env(safe-area-inset-bottom)) 12px; 
+        }
         
-        .card { background: var(--card-bg); border-radius: 16px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); border: 1px solid var(--border-color); margin-bottom: 20px; text-align: left; }
+        .card { 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 16px 14px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02); 
+            border: 1px solid var(--border-color); 
+            margin-bottom: 16px; 
+            text-align: left; 
+        }
         
-        .section-title { font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--text-main); text-align: left; }
+        .section-title { 
+            font-size: 17px; 
+            font-weight: 700; 
+            margin-bottom: 12px; 
+            color: var(--text-main); 
+            text-align: left; 
+        }
         
-        .order-types { display: flex; gap: 10px; margin-bottom: 15px; }
-        .type-btn { flex: 1; padding: 10px; border: 1px solid var(--border-color); background: #fdfdfe; border-radius: 10px; cursor: pointer; text-align: center; font-weight: 600; font-family: 'Sarabun', sans-serif; font-size: 14px; color: var(--text-sub); transition: all 0.2s; }
-        .type-btn.active { background-color: var(--primary); color: white; border-color: var(--primary); box-shadow: 0 4px 10px rgba(217,83,79,0.2); }
+        .order-types { 
+            display: flex; 
+            gap: 8px; 
+            margin-bottom: 15px; 
+        }
+        .type-btn { 
+            flex: 1; 
+            padding: 10px 6px; 
+            border: 1px solid var(--border-color); 
+            background: #fdfdfe; 
+            border-radius: 10px; 
+            cursor: pointer; 
+            text-align: center; 
+            font-weight: 600; 
+            font-family: 'Sarabun', sans-serif; 
+            font-size: 14px; 
+            color: var(--text-sub); 
+            transition: all 0.2s; 
+            white-space: nowrap; 
+        }
+        .type-btn.active { 
+            background-color: var(--primary); 
+            color: white; 
+            border-color: var(--primary); 
+            box-shadow: 0 4px 10px rgba(217,83,79,0.2); 
+        }
         
         /* แท็บหมวดหมู่สินค้า (Categories) */
-        .category-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; margin-bottom: 15px; scrollbar-width: none; }
+        .category-tabs { 
+            display: flex; 
+            gap: 8px; 
+            overflow-x: auto; 
+            padding-bottom: 8px; 
+            margin-bottom: 14px; 
+            scrollbar-width: none; 
+            -webkit-overflow-scrolling: touch;
+        }
         .category-tabs::-webkit-scrollbar { display: none; }
-        .cat-btn { background: #edf2f7; border: none; padding: 8px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; font-family: 'Sarabun', sans-serif; color: var(--text-sub); cursor: pointer; white-space: nowrap; transition: all 0.2s; }
-        .cat-btn.active { background: var(--text-main); color: white; }
+        .cat-btn { 
+            background: #edf2f7; 
+            border: none; 
+            padding: 8px 16px; 
+            border-radius: 20px; 
+            font-size: 14px; 
+            font-weight: 600; 
+            font-family: 'Sarabun', sans-serif; 
+            color: var(--text-sub); 
+            cursor: pointer; 
+            white-space: nowrap; 
+            transition: all 0.2s; 
+        }
+        .cat-btn.active { 
+            background: var(--text-main); 
+            color: white; 
+        }
 
-        .form-group { margin-bottom: 15px; text-align: left; }
-        label { display: block; margin-bottom: 6px; font-size: 14px; font-weight: 500; color: var(--text-sub); text-align: left; }
-        input, select, textarea { width: 100%; padding: 11px 14px; border: 1px solid var(--border-color); border-radius: 10px; box-sizing: border-box; font-family: 'Sarabun', sans-serif; background: #fafbfc; color: var(--text-main); font-size: 14px; }
-        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background: #fff; }
+        .form-group { 
+            margin-bottom: 15px; 
+            text-align: left; 
+        }
+        label { 
+            display: block; 
+            margin-bottom: 6px; 
+            font-size: 14px; 
+            font-weight: 500; 
+            color: var(--text-sub); 
+            text-align: left; 
+        }
+        /* ปรับ font-size: 16px เพื่อป้องกัน iPhone (Safari) ซูมหน้าจออัตโนมัติเวลาแตะพิมพ์ */
+        input, select, textarea { 
+            width: 100%; 
+            padding: 11px 14px; 
+            border: 1px solid var(--border-color); 
+            border-radius: 10px; 
+            box-sizing: border-box; 
+            font-family: 'Sarabun', sans-serif; 
+            background: #fafbfc; 
+            color: var(--text-main); 
+            font-size: 16px; 
+        }
+        input:focus, select:focus, textarea:focus { 
+            outline: none; 
+            border-color: var(--primary); 
+            background: #fff; 
+        }
         
-        .btn-location { background-color: #3498db; color: white; border: none; padding: 9px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: bold; font-family: 'Sarabun', sans-serif; margin-top: 6px; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s; width: 100%; justify-content: center; box-shadow: 0 2px 6px rgba(52,152,219,0.2); }
+        .btn-location { 
+            background-color: #3498db; 
+            color: white; 
+            border: none; 
+            padding: 10px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: bold; 
+            font-family: 'Sarabun', sans-serif; 
+            margin-top: 6px; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 6px; 
+            transition: background 0.2s; 
+            width: 100%; 
+            justify-content: center; 
+            box-shadow: 0 2px 6px rgba(52,152,219,0.2); 
+        }
         .btn-location:hover { background-color: #2980b9; }
 
-        /* ปรับปรุงการแสดงผลรายการเมนูให้อ่านง่าย ไม่ตัดคำเป็นแนวตั้ง */
-        .menu-item { display: flex; justify-content: space-between; align-items: center; gap: 12px; background: var(--card-bg); padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.01); transition: transform 0.1s; text-align: left; }
+        /* โครงสร้างการ์ดเมนู: ชื่อเมนูยาวเต็มด้านบน ราคาและปุ่มสั่งอยู่ด้านล่าง */
+        .menu-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 14px; 
+            background: var(--card-bg); 
+            padding: 12px; 
+            border-radius: 12px; 
+            border: 1px solid var(--border-color); 
+            margin-bottom: 12px; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02); 
+            text-align: left; 
+        }
         .menu-item:hover { border-color: #d0d7de; }
-        .menu-info { display: flex; align-items: center; gap: 14px; flex: 1; min-width: 0; text-align: left; }
-        .menu-img { width: 75px; height: 75px; border-radius: 10px; object-fit: cover; background: #eee; flex-shrink: 0; cursor: pointer; transition: opacity 0.2s; }
+        
+        .menu-img { 
+            width: 85px; 
+            height: 85px; 
+            border-radius: 10px; 
+            object-fit: cover; 
+            background: #eee; 
+            flex-shrink: 0; 
+            cursor: pointer; 
+            transition: opacity 0.2s; 
+        }
         .menu-img:hover { opacity: 0.85; }
-        .menu-details { flex: 1; min-width: 0; text-align: left; display: flex; flex-direction: column; justify-content: center; }
-        .menu-name { font-weight: 700; font-size: 16px; margin-bottom: 4px; color: var(--text-main); line-height: 1.35; word-break: normal; overflow-wrap: break-word; text-align: left; }
-        .menu-category { font-size: 12px; color: var(--text-sub); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left; }
-        .menu-price { color: var(--primary); font-size: 15px; font-weight: 700; white-space: nowrap; text-align: left; }
-        .btn-order { background-color: #fff; color: var(--primary); border: 1.5px solid var(--primary); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 700; font-family: 'Sarabun', sans-serif; font-size: 14px; flex-shrink: 0; white-space: nowrap; transition: all 0.2s; }
+        
+        .menu-details { 
+            flex: 1; 
+            min-width: 0; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between;
+            text-align: left; 
+        }
+        
+        .menu-name { 
+            font-weight: 700; 
+            font-size: 16px; 
+            margin-bottom: 2px; 
+            color: var(--text-main); 
+            line-height: 1.35; 
+            text-align: left; 
+        }
+        
+        .menu-category { 
+            font-size: 12px; 
+            color: var(--text-sub); 
+            margin-bottom: 8px; 
+            text-align: left; 
+        }
+        
+        .menu-bottom-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+
+        .menu-price { 
+            color: var(--primary); 
+            font-size: 16px; 
+            font-weight: 700; 
+            white-space: nowrap; 
+        }
+        
+        .btn-order { 
+            background-color: #fff; 
+            color: var(--primary); 
+            border: 1.5px solid var(--primary); 
+            padding: 6px 16px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 700; 
+            font-family: 'Sarabun', sans-serif; 
+            font-size: 14px; 
+            flex-shrink: 0; 
+            white-space: nowrap; 
+            transition: all 0.2s; 
+        }
         .btn-order:hover { background-color: var(--primary); color: white; }
 
-        .empty-menu { text-align: center; color: var(--text-sub); padding: 25px; font-size: 14px; }
+        .empty-menu { 
+            text-align: center; 
+            color: var(--text-sub); 
+            padding: 25px; 
+            font-size: 14px; 
+        }
         
-        /* ปรับปรุงปุ่มตะกร้าสินค้าด้านล่างให้ข้อความเรียงสวยงามในบรรทัดเดียว */
-        .floating-cart { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); padding: 12px 15px; box-shadow: 0 -4px 20px rgba(0,0,0,0.08); border-top: 1px solid var(--border-color); display: flex; justify-content: center; align-items: center; z-index: 100; }
-        .cart-summary-btn { background: #2c3e50; color: white; border: none; padding: 12px 24px; border-radius: 30px; font-weight: 700; font-family: 'Sarabun', sans-serif; font-size: 15px; cursor: pointer; box-shadow: 0 4px 12px rgba(44,62,80,0.2); display: inline-block; text-align: center; white-space: nowrap; width: 100%; max-width: 400px; transition: background 0.2s; }
+        /* ปุ่มตะกร้าสินค้าด้านล่าง พร้อมเผื่อระยะขอบล่างสำหรับ iPhone */
+        .floating-cart { 
+            position: fixed; 
+            bottom: 0; 
+            left: 0; 
+            right: 0; 
+            background: rgba(255, 255, 255, 0.95); 
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px); 
+            padding: 12px 15px calc(12px + env(safe-area-inset-bottom)) 15px; 
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.08); 
+            border-top: 1px solid var(--border-color); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            z-index: 100; 
+        }
+        .cart-summary-btn { 
+            background: #2c3e50; 
+            color: white; 
+            border: none; 
+            padding: 12px 24px; 
+            border-radius: 30px; 
+            font-weight: 700; 
+            font-family: 'Sarabun', sans-serif; 
+            font-size: 15px; 
+            cursor: pointer; 
+            box-shadow: 0 4px 12px rgba(44,62,80,0.2); 
+            display: inline-block; 
+            text-align: center; 
+            white-space: nowrap; 
+            width: 100%; 
+            max-width: 400px; 
+            transition: background 0.2s; 
+        }
         .cart-summary-btn:hover { background: #34495e; }
         
-        .status-tracker-card { background: linear-gradient(135deg, #34495e, #2c3e50); color: white; border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(44,62,80,0.15); display: none; text-align: left; }
-        .tracker-header { display: flex; justify-content: space-between; align-items: center; font-size: 14px; opacity: 0.85; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; margin-bottom: 12px; }
-        .tracker-body { display: flex; justify-content: space-between; align-items: center; }
-        .tracker-queue { font-size: 20px; font-weight: bold; }
-        .tracker-status { background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: bold; white-space: nowrap; }
+        .status-tracker-card { 
+            background: linear-gradient(135deg, #34495e, #2c3e50); 
+            color: white; 
+            border-radius: 16px; 
+            padding: 20px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 4px 15px rgba(44,62,80,0.15); 
+            display: none; 
+            text-align: left; 
+        }
+        .tracker-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            font-size: 14px; 
+            opacity: 0.85; 
+            border-bottom: 1px solid rgba(255,255,255,0.1); 
+            padding-bottom: 8px; 
+            margin-bottom: 12px; 
+        }
+        .tracker-body { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+        .tracker-queue { 
+            font-size: 20px; 
+            font-weight: bold; 
+        }
+        .tracker-status { 
+            background: rgba(255,255,255,0.15); 
+            padding: 6px 14px; 
+            border-radius: 20px; 
+            font-size: 13px; 
+            font-weight: bold; 
+            white-space: nowrap; 
+        }
 
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
-        .modal-content { background: var(--card-bg); width: 90%; max-width: 420px; border-radius: 16px; padding: 22px; max-height: 85vh; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: left; }
-        .modal-header { font-size: 17px; font-weight: bold; margin-bottom: 15px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; color: var(--text-main); display: flex; justify-content: space-between; align-items: center; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 1000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.4); 
+            -webkit-backdrop-filter: blur(4px);
+            backdrop-filter: blur(4px); 
+            align-items: center; 
+            justify-content: center; 
+        }
+        .modal-content { 
+            background: var(--card-bg); 
+            width: 90%; 
+            max-width: 420px; 
+            border-radius: 16px; 
+            padding: 22px; 
+            max-height: 85vh; 
+            overflow-y: auto; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            text-align: left; 
+        }
+        .modal-header { 
+            font-size: 17px; 
+            font-weight: bold; 
+            margin-bottom: 15px; 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 10px; 
+            color: var(--text-main); 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
         
-        .option-section { margin-bottom: 15px; background: #f8f9fa; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); text-align: left; }
-        .option-title { font-weight: bold; font-size: 13px; color: var(--primary); display: block; margin-bottom: 8px; text-align: left; }
-        .checkbox-label { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; font-size: 14px; cursor: pointer; text-align: left; }
-        .checkbox-label input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--primary); cursor: pointer; margin: 0; flex-shrink: 0; }
+        .option-section { 
+            margin-bottom: 15px; 
+            background: #f8f9fa; 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid var(--border-color); 
+            text-align: left; 
+        }
+        .option-title { 
+            font-weight: bold; 
+            font-size: 13px; 
+            color: var(--primary); 
+            display: block; 
+            margin-bottom: 8px; 
+            text-align: left; 
+        }
+        .checkbox-label { 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            margin-bottom: 8px; 
+            font-size: 15px; 
+            cursor: pointer; 
+            text-align: left; 
+        }
+        .checkbox-label input[type="checkbox"] { 
+            width: 18px; 
+            height: 18px; 
+            accent-color: var(--primary); 
+            cursor: pointer; 
+            margin: 0; 
+            flex-shrink: 0; 
+        }
         
-        .modal-buttons { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #e2e8f0; color: #475569; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-family: 'Sarabun', sans-serif; font-size: 14px; text-align: center; }
-        .btn-confirm { background: #27ae60; color: white; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-family: 'Sarabun', sans-serif; font-size: 14px; text-align: center; }
-        .btn-secondary { background: #e2e8f0; color: #475569; border: none; padding: 11px; border-radius: 10px; flex: 1; cursor: pointer; font-weight: bold; font-family: 'Sarabun', sans-serif; font-size: 14px; text-align: center; }
+        .modal-buttons { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 20px; 
+        }
+        .btn-cancel { 
+            background: #e2e8f0; 
+            color: #475569; 
+            border: none; 
+            padding: 11px; 
+            border-radius: 10px; 
+            flex: 1; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-family: 'Sarabun', sans-serif; 
+            font-size: 15px; 
+            text-align: center; 
+        }
+        .btn-confirm { 
+            background: #27ae60; 
+            color: white; 
+            border: none; 
+            padding: 11px; 
+            border-radius: 10px; 
+            flex: 1; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-family: 'Sarabun', sans-serif; 
+            font-size: 15px; 
+            text-align: center; 
+        }
+        .btn-secondary { 
+            background: #e2e8f0; 
+            color: #475569; 
+            border: none; 
+            padding: 11px; 
+            border-radius: 10px; 
+            flex: 1; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-family: 'Sarabun', sans-serif; 
+            font-size: 15px; 
+            text-align: center; 
+        }
 
-        .cart-item-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 14px; text-align: left; }
-        .cart-item-details { flex: 1; margin-right: 10px; text-align: left; }
-        .cart-item-name { font-weight: bold; color: var(--text-main); }
-        .cart-item-sub { font-size: 12px; color: var(--text-sub); margin-top: 2px; }
-        .cart-item-price { font-weight: bold; color: var(--primary); white-space: nowrap; margin-right: 10px; }
-        .btn-remove-item { background: #ff4d4d; color: white; border: none; padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 12px; font-family: 'Sarabun', sans-serif; flex-shrink: 0; }
+        .cart-item-row { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 10px 0; 
+            border-bottom: 1px solid var(--border-color); 
+            font-size: 14px; 
+            text-align: left; 
+        }
+        .cart-item-details { 
+            flex: 1; 
+            margin-right: 10px; 
+            text-align: left; 
+        }
+        .cart-item-name { 
+            font-weight: bold; 
+            color: var(--text-main); 
+        }
+        .cart-item-sub { 
+            font-size: 12px; 
+            color: var(--text-sub); 
+            margin-top: 2px; 
+        }
+        .cart-item-price { 
+            font-weight: bold; 
+            color: var(--primary); 
+            white-space: nowrap; 
+            margin-right: 10px; 
+        }
+        .btn-remove-item { 
+            background: #ff4d4d; 
+            color: white; 
+            border: none; 
+            padding: 4px 8px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 12px; 
+            font-family: 'Sarabun', sans-serif; 
+            flex-shrink: 0; 
+        }
 
-        .image-modal { display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); backdrop-filter: blur(5px); align-items: center; justify-content: center; flex-direction: column; padding: 20px; box-sizing: border-box; }
-        .image-modal img { max-width: 90%; max-height: 80vh; border-radius: 12px; object-fit: contain; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .image-modal-caption { color: white; margin-top: 15px; font-size: 17px; font-weight: bold; text-align: center; }
-        .image-modal-close { position: absolute; top: 20px; right: 25px; color: white; font-size: 35px; font-weight: bold; cursor: pointer; }
+        .image-modal { 
+            display: none; 
+            position: fixed; 
+            z-index: 2000; 
+            left: 0; 
+            top: 0; 
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.85); 
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px); 
+            align-items: center; 
+            justify-content: center; 
+            flex-direction: column; 
+            padding: 20px; 
+            box-sizing: border-box; 
+        }
+        .image-modal img { 
+            max-width: 90%; 
+            max-height: 80vh; 
+            border-radius: 12px; 
+            object-fit: contain; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+        }
+        .image-modal-caption { 
+            color: white; 
+            margin-top: 15px; 
+            font-size: 17px; 
+            font-weight: bold; 
+            text-align: center; 
+        }
+        .image-modal-close { 
+            position: absolute; 
+            top: 20px; 
+            right: 25px; 
+            color: white; 
+            font-size: 35px; 
+            font-weight: bold; 
+            cursor: pointer; 
+        }
     </style>
 </head>
 <body>
@@ -416,7 +846,7 @@
         renderMenus();
     }
 
-    // แสดงรายการเมนูตามหมวดหมู่ที่เลือก
+    // แสดงรายการเมนูตามหมวดหมู่ที่เลือก (ปรับโครงสร้างใหม่ให้ชื่อเมนูมีพื้นที่เต็มด้านขวาของรูป)
     function renderMenus() {
         const menuListContainer = document.getElementById('menuList');
         const filteredMenus = currentCategory === 'all' ? menus : menus.filter(m => (m.category || 'อื่นๆ') === currentCategory);
@@ -437,15 +867,17 @@
             }
 
             itemDiv.innerHTML = `
-                <div class="menu-info">
-                    <img src="${imgSrc}" class="menu-img" alt="${menu.name}" onclick="openImageModal('${imgSrc}', '${menu.name}')" onerror="this.src='https://images.unsplash.com/photo-1553163147-622ab57b1c2?w=150'">
-                    <div class="menu-details">
+                <img src="${imgSrc}" class="menu-img" alt="${menu.name}" onclick="openImageModal('${imgSrc}', '${menu.name}')" onerror="this.src='https://images.unsplash.com/photo-1553163147-622ab57b1c2?w=150'">
+                <div class="menu-details">
+                    <div>
                         <div class="menu-name">${menu.name}</div>
                         <div class="menu-category">📁 ${menu.category || 'ทั่วไป'}</div>
+                    </div>
+                    <div class="menu-bottom-row">
                         <div class="menu-price">${menu.price} บาท</div>
+                        <button class="btn-order" onclick="openOptionModal(${menu.id})">เลือกสั่ง</button>
                     </div>
                 </div>
-                <button class="btn-order" onclick="openOptionModal(${menu.id})">เลือกสั่ง</button>
             `;
             menuListContainer.appendChild(itemDiv);
         });
